@@ -3,7 +3,7 @@ import crypto from 'crypto'
 
 import bcrypt from 'bcrypt'
 
-import { SALT } from './config'
+import { SALT } from './config.js'
 
 const { Schema } = new DBLocal({ path: './db' })
 
@@ -15,12 +15,8 @@ const User = Schema('User', {
 
 export class UserRepository {
   static async create ({ username, password }) {
-    // User & Pass Validation (Optional: Use zod)
-    if (typeof username !== 'string') throw new Error('Username must be a string')
-    if (username.length < 3) throw new Error('Username must be at least 3 characters long')
-
-    if (typeof password !== 'string') throw new Error('Password must be a string')
-    if (password.length < 6) throw new Error('Password must be at least 6 characters long')
+    validation.username(username)
+    validation.password(password)
 
     const user = User.findOne({ username })
     if (user) throw new Error('Username already exists')
@@ -33,5 +29,31 @@ export class UserRepository {
     return id
   }
 
-  static login ({ username, password }) {}
+  static async login ({ username, password }) {
+    validation.username(username)
+    validation.password(password)
+
+    const user = User.findOne({ username })
+    if (!user) throw new Error('User not found')
+
+    const isValid = await bcrypt.compare(password, user.password)
+    if (!isValid) throw new Error('Invalid password')
+
+    const { password: _, ...publicUser } = user
+
+    return publicUser
+  }
+}
+
+// User & Pass Validation (Optional: Use zod)
+class validation {
+  static username (username) {
+    if (typeof username !== 'string') throw new Error('Username must be a string')
+    if (username.length < 3) throw new Error('Username must be at least 3 characters long')
+  }
+
+  static password (password) {
+    if (typeof password !== 'string') throw new Error('Password must be a string')
+    if (password.length < 6) throw new Error('Password must be at least 6 characters long')
+  }
 }
