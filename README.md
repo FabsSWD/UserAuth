@@ -1,6 +1,6 @@
 # Sesión de Usuario, Autenticación y Autorización
 
-1. Instalación del Proyecto []
+1. Instalación del Proyecto [X]
 2. Usuarios en Base de datos []
 3. Registro de Usuarios []
 4. Autenticación básica con Login y Password []
