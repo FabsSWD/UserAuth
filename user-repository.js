@@ -14,7 +14,7 @@ const User = Schema('User', {
 })
 
 export class UserRepository {
-  static create ({ username, password }) {
+  static async create ({ username, password }) {
     // User & Pass Validation (Optional: Use zod)
     if (typeof username !== 'string') throw new Error('Username must be a string')
     if (username.length < 3) throw new Error('Username must be at least 3 characters long')
@@ -26,7 +26,7 @@ export class UserRepository {
     if (user) throw new Error('Username already exists')
 
     const id = crypto.randomUUID()
-    const hashedPassword = bcrypt.hashSync(password, SALT) // HashSync blocks the main thread
+    const hashedPassword = await bcrypt.hash(password, SALT)
 
     User.create({ _id: id, username, password: hashedPassword }).save()
 
